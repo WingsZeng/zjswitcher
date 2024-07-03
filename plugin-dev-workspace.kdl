@@ -1,0 +1,34 @@
+layout {
+    pane size=1 borderless=true {
+        plugin location="zellij:tab-bar"
+    }
+    pane split_direction="vertical" {
+        // can't handle edit-pane now, use command instead
+        pane command="nvim" {
+            args "src/main.rs"
+        }
+        pane {
+            pane name="log" command="bash" {
+                args "-c" "id -u | xargs -I {} bash -c 'tail -f /tmp/zellij-{}/zellij-log/zellij.log'"
+            }
+            pane stacked=true {
+                // I don't know how to ensure the plugin is loaded only once :(
+                // pane size="10%" command="bash" name="COMPILE AND RELOAD PLUGIN" {
+                    // args "-c" "cargo build && zellij action start-or-reload-plugin file:target/wasm32-wasi/debug/zjswitcher.wasm"
+                    // if you have "watchexec" installed, you can comment the above line and uncomment the below one to build + reload the plugin on fs changes
+                    // args "-c" "watchexec 'cargo build && zellij action start-or-reload-plugin file:target/wasm32-wasi/debug/zjswitcher.wasm'"
+                // }
+                pane expanded=true
+                pane {
+                    plugin location="file:target/wasm32-wasi/debug/zjswitcher.wasm" {
+                        programs_in_locked_mode "nvim, lazydocker"
+                        hide true
+                    }
+                }
+            }
+        }
+    }
+    pane size=2 borderless=true {
+        plugin location="zellij:status-bar"
+    }
+}
