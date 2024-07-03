@@ -1,6 +1,6 @@
 # zjswitcher
 
-A zellij plugin that automatically switch between normal mode and locked mode based on configuraion. 
+A zellij plugin that automatically switches between normal mode and locked mode based on configuraion. 
 
 ## Why?
 
