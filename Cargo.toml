@@ -1,0 +1,9 @@
+[package]
+name = "zjswitcher"
+version = "0.1.0"
+authors = ["Wings Zeng <wings.xiangyi.zeng@gmail.com>"]
+edition = "2021"
+
+[dependencies]
+zellij-tile = "0.40.1"
+kdl = "5.0.0-alpha.1"
