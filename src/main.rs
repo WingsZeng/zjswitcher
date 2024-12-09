@@ -4,10 +4,6 @@ use zellij_tile::prelude::*;
 
 static SHELL: Lazy<String> = Lazy::new(|| std::env::var("SHELL").unwrap_or_default());
 
-fn is_normal_or_locked_mode(mode: &InputMode) -> bool {
-    mode == &InputMode::Normal || mode == &InputMode::Locked
-}
-
 #[derive(Default)]
 struct State {
     got_permission: bool,
@@ -53,7 +49,7 @@ impl ZellijPlugin for State {
             Event::ModeUpdate(mode_manifest) => {
                 let input_mode = mode_manifest.mode;
                 if let Some(pane_id) = self.focused_pane_id {
-                    match (input_mode, is_normal_or_locked_mode(&self.input_mode)) {
+                    match (input_mode, self.is_in_normal_or_locked_mode()) {
                         (InputMode::Normal, true) | (InputMode::Locked, _) => {
                             self.pane_mode_map.insert(pane_id, input_mode);
                         }
@@ -133,13 +129,16 @@ impl State {
         if focused_pane_id != self.focused_pane_id {
             if let Some(pane_id) = focused_pane_id {
                 if let Some(input_mode) = self.pane_mode_map.get(&pane_id) {
-                    if is_normal_or_locked_mode(&self.input_mode) {
+                    if self.is_in_normal_or_locked_mode() {
                         switch_to_input_mode(input_mode);
                     }
                 };
             }
             self.focused_pane_id = focused_pane_id;
         }
+    }
+    fn is_in_normal_or_locked_mode(&self) -> bool {
+        self.input_mode == InputMode::Normal || self.input_mode == InputMode::Locked
     }
 }
 
