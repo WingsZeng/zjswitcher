@@ -1,0 +1,5 @@
+load_plugins {
+    "file:target/wasm32-wasip1/debug/zjswitcher.wasm" {
+        programs_in_locked_mode "nvim, yazi, sshs, lazygit, lazydocker, bluetuith, neomutt, sc-im, ssh"
+    }
+}
