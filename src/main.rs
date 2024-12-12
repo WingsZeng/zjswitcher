@@ -69,7 +69,7 @@ impl ZellijPlugin for State {
                 {
                     if active_tab_pos != self.active_tab_pos {
                         self.active_tab_pos = active_tab_pos;
-                        if let Some(last_pane_event) = self.last_pane_event.clone() {
+                        if let Some(last_pane_event) = self.last_pane_event.take() {
                             self.handle_pane_update(&last_pane_event);
                         }
                     }
