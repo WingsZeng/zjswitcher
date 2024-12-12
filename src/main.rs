@@ -106,33 +106,31 @@ impl State {
         }
     }
     fn handle_pane_update(&mut self, manifest: &PaneManifest) {
-        manifest.panes.get(&self.active_tab_pos).map(|panes| {
-            panes
-                .iter()
-                .find(|pane| pane.is_focused && !pane.is_plugin)
-                .map(|focused_pane| {
-                    let focused_pane_id = PaneId::Terminal(focused_pane.id);
-                    #[allow(clippy::map_entry)]
-                    if !self.pane_mode_map.contains_key(&focused_pane_id) {
-                        let cmdline = focused_pane
-                            .terminal_command
-                            .clone()
-                            .unwrap_or_else(|| SHELL.to_string());
-                        let program = parse_program_from_cmdline(&cmdline).unwrap_or_default();
-                        let default_input_mode = self.get_default_input_mode_by_program(program);
-                        self.pane_mode_map
-                            .insert(focused_pane_id, default_input_mode);
-                    }
-                    if Some(focused_pane_id) != self.focused_pane_id {
-                        if let Some(input_mode) = self.pane_mode_map.get(&focused_pane_id) {
-                            if self.is_in_normal_or_locked_mode() {
-                                switch_to_input_mode(input_mode);
-                            };
+        if let Some(panes) = manifest.panes.get(&self.active_tab_pos) {
+            if let Some(focused_pane) = panes.iter().find(|pane| pane.is_focused && !pane.is_plugin)
+            {
+                let focused_pane_id = PaneId::Terminal(focused_pane.id);
+                #[allow(clippy::map_entry)]
+                if !self.pane_mode_map.contains_key(&focused_pane_id) {
+                    let cmdline = focused_pane
+                        .terminal_command
+                        .clone()
+                        .unwrap_or_else(|| SHELL.to_string());
+                    let program = parse_program_from_cmdline(&cmdline).unwrap_or_default();
+                    let default_input_mode = self.get_default_input_mode_by_program(program);
+                    self.pane_mode_map
+                        .insert(focused_pane_id, default_input_mode);
+                }
+                if Some(focused_pane_id) != self.focused_pane_id {
+                    if let Some(input_mode) = self.pane_mode_map.get(&focused_pane_id) {
+                        if self.is_in_normal_or_locked_mode() {
+                            switch_to_input_mode(input_mode);
                         }
-                        self.focused_pane_id = Some(focused_pane_id);
                     }
-                })
-        });
+                    self.focused_pane_id = Some(focused_pane_id);
+                }
+            }
+        }
     }
     fn is_in_normal_or_locked_mode(&self) -> bool {
         self.input_mode == InputMode::Normal || self.input_mode == InputMode::Locked
