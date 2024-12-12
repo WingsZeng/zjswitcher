@@ -91,7 +91,9 @@ impl ZellijPlugin for State {
         if pipe_message.name == "Event::CommandUpdate" {
             if let Some(cmdline) = pipe_message.payload {
                 if let Some(program) = parse_program_from_cmdline(&cmdline) {
-                    switch_to_input_mode(&self.get_default_input_mode_by_program(program));
+                    self.try_switch_between_normal_and_locked_mode(
+                        &self.get_default_input_mode_by_program(program),
+                    );
                 }
             };
         }
@@ -124,9 +126,7 @@ impl State {
                 }
                 if Some(focused_pane_id) != self.focused_pane_id {
                     if let Some(input_mode) = self.pane_mode_map.get(&focused_pane_id) {
-                        if self.is_in_normal_or_locked_mode() {
-                            switch_to_input_mode(input_mode);
-                        }
+                        self.try_switch_between_normal_and_locked_mode(input_mode);
                     }
                     self.focused_pane_id = Some(focused_pane_id);
                 }
@@ -135,6 +135,12 @@ impl State {
     }
     fn is_in_normal_or_locked_mode(&self) -> bool {
         self.input_mode == InputMode::Normal || self.input_mode == InputMode::Locked
+    }
+
+    fn try_switch_between_normal_and_locked_mode(&self, mode: &InputMode) {
+        if self.is_in_normal_or_locked_mode() && self.input_mode != *mode {
+            switch_to_input_mode(mode);
+        }
     }
 }
 
