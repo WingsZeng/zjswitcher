@@ -54,7 +54,9 @@ impl ZellijPlugin for State {
                             self.pane_mode_map.insert(pane_id, input_mode);
                         }
                         (InputMode::Normal, false) => {
-                            switch_to_input_mode(self.pane_mode_map.get(&pane_id).unwrap());
+                            if let Some(pane_input_mode) = self.pane_mode_map.get(&pane_id) {
+                                switch_to_input_mode(pane_input_mode);
+                            }
                         }
                         _ => {}
                     }
@@ -62,15 +64,14 @@ impl ZellijPlugin for State {
                 self.input_mode = input_mode;
             }
             Event::TabUpdate(tabs) => {
-                let active_tab_pos = tabs
-                    .iter()
-                    .find(|tab| tab.active)
-                    .map(|tab| tab.position)
-                    .unwrap();
-                if active_tab_pos != self.active_tab_pos {
-                    self.active_tab_pos = active_tab_pos;
-                    if let Some(last_pane_event) = self.last_pane_event.clone() {
-                        self.handle_pane_update(&last_pane_event);
+                if let Some(active_tab_pos) =
+                    tabs.iter().find(|tab| tab.active).map(|tab| tab.position)
+                {
+                    if active_tab_pos != self.active_tab_pos {
+                        self.active_tab_pos = active_tab_pos;
+                        if let Some(last_pane_event) = self.last_pane_event.clone() {
+                            self.handle_pane_update(&last_pane_event);
+                        }
                     }
                 }
             }
